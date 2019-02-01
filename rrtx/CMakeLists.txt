@@ -204,6 +204,7 @@ include_directories(
 # catkin_add_nosetests(test)
 
 
-add_executable(rrtx src/rrtx.cpp src/functions.cpp)
+add_executable(rrtx src/rrtx.cpp src/functions.cpp src/shrinkingBallRadius.cpp src/saturate.cpp src/extend.cpp src/findParent.cpp 
+src/cullNeighbors.cpp src/rewireNeighbors.cpp src/verrifyQueue.cpp)
 target_link_libraries(rrtx ${catkin_LIBRARIES})
 

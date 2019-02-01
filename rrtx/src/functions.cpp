@@ -1,4 +1,5 @@
 #include "functions.hpp"
+#include"algorithms.hpp"
 #include<iostream>
 #include<cstring>
 #include <random>
@@ -186,3 +187,52 @@ void sortrows(Matrix& matrix, int col) {
 	});
 }
 
+
+
+
+
+int costmapObstacleCheck(Row xnear, Row xnew, nav_msgs::OccupancyGrid mapsub)
+{
+	double rez = double(mapsub.info.resolution) * 1;
+	double stepz = int(ceil(euc_dist(xnew, xnear)) / rez);
+	Row xnew_ = xnew;
+	Row xnear_ = xnear;
+	int obs = 0;
+	int out = 0;
+
+	for (int c = 0; c < stepz; c++)
+	{
+		saturate(xnew_, xnear_, rez);
+		xnear_ = xnew_; 
+		xnew_ = xnew; //reset
+		//ROS_WARN("check %i",gridValue(mapsub, xnear_));
+		if (gridValue(mapsub, xnear_) > 0) //costMap grid value is between 96-99 -->
+			obs = 1;
+	}
+
+	if (obs == 1)
+		out = 0; //obstacle
+	else
+		out = 1; //no obstacle
+
+	return out;
+}
+
+//gridValue function
+int gridValue(nav_msgs::OccupancyGrid &mapData, Row Xp)
+{
+
+	double resolution = mapData.info.resolution;
+	double Xstartx = mapData.info.origin.position.x;
+	double Xstarty = mapData.info.origin.position.y;
+
+	double width = mapData.info.width;
+	std::vector<signed char> Data = mapData.data;
+
+	//map data:  100 occupied      -1 unknown       0 free
+
+	double indx = (floor((Xp[1] - Xstarty) / resolution) * width) + (floor((Xp[0] - Xstartx) / resolution));
+	int out;
+	out = Data[int(indx)]; 
+	return out;
+}

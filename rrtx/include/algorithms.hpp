@@ -25,7 +25,7 @@ struct obstacle
 
 //for extend
 struct N; //forward dec
-Row extend(Matrix& graph, double r, Row& lmc,N& neighbors, obstacle obs, double safetyFactor);
+Row extend(Matrix& graph, double r, Row& lmc,N& neighbors,nav_msgs::OccupancyGrid mapsub);
 
 //for findParent
 Row findParent(Row current_node, Matrix nearest_nodes, Row dist_to_near_nodes, Row& lmc, vector<int> andix,int current_node_index);

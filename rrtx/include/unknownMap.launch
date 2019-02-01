@@ -51,11 +51,11 @@
 
 
     <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node" >
-      <rosparam file="/home/sohail/catkin_ws/src/rapid_random_tree/rrt/param/costmap2d.yaml" command="load" ns="costmap" />
+      <rosparam file="$(find optimized_rapid_random_tree)/param/costmap2d.yaml" command="load" ns="costmap" />
     </node>
 
 
-    <node pkg="rapid_random_tree" type="rrt" name="rrt" output="screen" >
+    <node pkg="optimized_rapid_random_tree" type="rrtx" name="rrtx" output="screen" >
     </node>
 
 

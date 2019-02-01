@@ -37,3 +37,6 @@ vector<int> findRow(Matrix matrix, int node_index);
 void sortrows(Matrix& matrix, int col);//oK I guess!
 
 int findInVec(vector<int> vec, int number);//oK I guess!
+
+int costmapObstacleCheck(Row xnear, Row xnew, nav_msgs::OccupancyGrid mapsub);
+int gridValue(nav_msgs::OccupancyGrid &mapData, Row Xp);
