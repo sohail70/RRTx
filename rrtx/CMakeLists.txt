@@ -204,6 +204,6 @@ include_directories(
 # catkin_add_nosetests(test)
 
 
-add_executable(rrt_star src/rrt_star.cpp src/functions.cpp)
-target_link_libraries(rrt_star ${catkin_LIBRARIES})
+add_executable(rrtx src/rrtx.cpp src/functions.cpp)
+target_link_libraries(rrtx ${catkin_LIBRARIES})
 
