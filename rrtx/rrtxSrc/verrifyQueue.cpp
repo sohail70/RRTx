@@ -1,0 +1,28 @@
+#include "rrtx_algorithms.h"
+#include "magic_algorithms.h"
+#include <algorithm>
+
+void verrifyQueue(Matrix &Q , double gValue , double lmc , double node)
+{
+	Row row_col;
+	row_col = find(Q, node);
+	double row_index = row_col[0];
+	double col_index = row_col[1]; //for debugging
+
+	if (row_index != -1 && col_index != -1) //for existing node in Q
+	{
+		double temp = min(gValue,lmc);
+		Q[row_index][0] = temp;
+		Q[row_index][1] = gValue;
+		Q[row_index][2] = node;
+	}
+	else
+	{
+		Row temp = { min(gValue,lmc),gValue,node};
+		Q.push_back(temp);
+	}
+
+	//now we need to sort the priority Queue--> now that's a challange :-)
+    //https://stackoverflow.com/questions/31370380/c-method-to-order-a-matrix-by-elements-in-a-column-the-same-of-sortrows-in-ma
+	sortrows(Q, 0);
+}

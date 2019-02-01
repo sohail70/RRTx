@@ -8,29 +8,55 @@
 #include <vector>
 #include "stdint.h"
 #include "functions.hpp"
+#include "algorithms.hpp"
+//////////////////////////////////////////////////////////
+nav_msgs::OccupancyGrid costmapData;
+bool goalChanged = false;
+//////////////////////////////////////////////////////////////////////////
+double x_goal, y_goal;
+double x_start, y_start;
+double step_size = 0.5;
+double robotNode = numeric_limits<double>::infinity();
+bool reachedStart = false;
+double val; //for finding nearest node
+Row dist;   //for finding nearest node-->given to min function
+tuple<double, int> min_dist;
+//LMC initilization ...refrence it to the functions!
+Row lmc;
+// g_value initialization
+vector<double> gValue;
+// neighbor instance
+N neighbors;
+//there is NewDistance coming out of extend...maybe pass it by reference!
+Row temp_newDist;
+Matrix newDist;
+//Initialization of priority queue
+Matrix Q;
+//epsilon consistent
+double epsilon = 0.5;
+//orphan nodes container
+vector<int> orphansIndex;
 
-#include "nav_msgs/OccupancyGrid.h"
-#include "geometry_msgs/PointStamped.h"
-#include "std_msgs/Header.h"
-#include "nav_msgs/MapMetaData.h"
-#include "geometry_msgs/Point.h"
-#include "visualization_msgs/Marker.h"
-#include <tf/transform_listener.h>
+/////////////////////////////////////////////////////////////////////////
+void costMapUpdateCallBack(const nav_msgs::OccupancyGrid::ConstPtr &costmap_msg)
+{
+    costmapData = *costmap_msg;
+}
 
-
-
-
-
-
-
+void rvizGoalCallBack(const geometry_msgs::PoseStamped::ConstPtr &msg)
+{
+    x_goal = msg->pose.position.x;
+    y_goal = msg->pose.position.y;
+    ROS_WARN("Hadafe jadid :  %f %f", x_goal, y_goal);
+    goalChanged = true;
+}
 
 int main(int argc, char **argv)
 {
-	ros::Rate rate(100);
-    ros::init(argc, argv, "optimized_rapid_random_tree");
-
-        ros::spinOnce();
-        rate.sleep();
-    
-    return 0;
+    lmc.push_back(0);
+    gValue.push_back(0);
+    //graph initialization
+    Row node = {x_goal, y_goal, 0, 0}; //a node in a tree //initializaton//forth column is yet to be valued!
+    Matrix graph;                      //whole nodes --- graph it self---sotone sevom in index node hengame ijadesh hast//sotone chaharmo parent node hast
+    graph.push_back(node);
 }
