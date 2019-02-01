@@ -1,0 +1,34 @@
+<!-- move base -->
+<launch>
+  <master auto="start"/>
+<param name="use_sim_time" value="true" />
+  <arg name="namespace"/>
+<arg name="map_file" default="/home/sohail/catkin_ws/src/rapid_random_tree/rrt/maps/mapBig.yaml"/>
+
+
+
+   <!-- Map server -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+  <!-- AMCL -->
+  <include file="$(find turtlebot3_navigation)/launch/amcl.launch"/>
+
+    <node pkg="costmap_2d" type="costmap_2d_markers" name="voxel_visualizer">
+      <remap from="voxel_grid" to="costmap/voxel_grid"/>
+    </node>
+
+
+
+    <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node" >
+      <rosparam file="/home/sohail/catkin_ws/src/rapid_random_tree/rrt/param/costmap2d.yaml" command="load" ns="costmap" />
+    </node>
+
+
+    <node pkg="rapid_random_tree" type="rrt" name="rrt" output="screen" >
+    </node>
+
+
+
+    <!--node pkg="rrt_control" type="rrt_control" name="control" output="screen">
+    </node-->
+
+</launch>
