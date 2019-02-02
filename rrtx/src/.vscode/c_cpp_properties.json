@@ -1,0 +1,42 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/sohail/catkin_ws/devel/include",
+                "/opt/ros/kinetic/include",
+                "/home/sohail/catkin_ws/src/mav_comm/mav_msgs/include",
+                "/home/sohail/catkin_ws/src/ROS_quadrotor_simulator/moveit_simple_controller_manager/include",
+                "/home/sohail/catkin_ws/src/multi_robot/include",
+                "/home/sohail/catkin_ws/src/obstacle_detector/include",
+                "/home/sohail/catkin_ws/src/optimized_rapid_random_tree/rrtx/include",
+                "/home/sohail/catkin_ws/src/mav_comm/planning_msgs/include",
+                "/home/sohail/catkin_ws/src/ROS_quadrotor_simulator/quad_control/include",
+                "/home/sohail/catkin_ws/src/ROS_quadrotor_simulator/quad_joystick_interface/include",
+                "/home/sohail/catkin_ws/src/rapid_random_tree/rrt/include",
+                "/home/sohail/catkin_ws/src/rotors_simulator/rotors_control/include",
+                "/home/sohail/catkin_ws/src/rotors_simulator/rotors_gazebo_plugins/include",
+                "/home/sohail/catkin_ws/src/rotors_simulator/rotors_joy_interface/include",
+                "/home/sohail/catkin_ws/src/rotors_simulator/rotors_model/include",
+                "/home/sohail/catkin_ws/src/rapid_random_tree/rrt_control/include",
+                "/home/sohail/catkin_ws/src/rrt_exploration/include",
+                "/home/sohail/catkin_ws/src/rrtirex/include",
+                "/home/sohail/catkin_ws/src/rrtx_slam/include",
+                "/home/sohail/catkin_ws/src/simple_plugin/include",
+                "/home/sohail/catkin_ws/src/sohail_rrt/include",
+                "/home/sohail/catkin_ws/src/turtlebot3_simulations/turtlebot3_fake/include",
+                "/home/sohail/catkin_ws/src/turtlebot3_simulations/turtlebot3_gazebo/include",
+                "/home/sohail/catkin_ws/src/turtlebot3/turtlebot3_slam/include",
+                "/home/sohail/catkin_ws/src/turtlebot1/turtlebot_apps-indigo/turtlebot_actions/include",
+                "/home/sohail/catkin_ws/src/turtlebot1/turtlebot_rrt/include",
+                "/usr/include"
+            ],
+            "name": "Linux",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}

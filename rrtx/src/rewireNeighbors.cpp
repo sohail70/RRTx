@@ -8,7 +8,8 @@ void rewireNeighbors(int someNodeIndex , Matrix& graph, Matrix& Q, N& neighbors 
 {
 	//MAYBE TODO: there is checker in my MATLAB version which I used in this function---but do i really need it? maybe I should just ignore the 
 	//sampling node which are in newly found obstacles-- or maybe not!
-	cullNeighbors(graph ,someNodeIndex,neighbors,r,newDist);
+	
+	//cullNeighbors(graph ,someNodeIndex,neighbors,r,newDist);
 
 	//parent of someNodeIndex
 	int Parent = graph[someNodeIndex][3]; //index of that parent
@@ -32,17 +33,20 @@ void rewireNeighbors(int someNodeIndex , Matrix& graph, Matrix& Q, N& neighbors 
 	{
 	
 		int u = wholeMinusNeighbors[j]; //i'th neighbor node of the someNodeIndex
+		//ROS_WARN("is it gonna change %f %f", lmc[u],newDist[max(u, someNodeIndex)][min(u, someNodeIndex)] + lmc[someNodeIndex]);
 		if (lmc[u] > newDist[max(u, someNodeIndex)][min(u, someNodeIndex)] + lmc[someNodeIndex])
 		{
 			//update the lmc of neighbor node--> because someNodeIndex gives u a better path
+		//	ROS_WARN("yes,changed the parent of %i from %f to %i and before lmc:%f newlmc:%f",u,graph[u][3],someNodeIndex,lmc[u],newDist[max(u, someNodeIndex)][min(u, someNodeIndex)] + lmc[someNodeIndex]);
 			lmc[u] = newDist[max(u, someNodeIndex)][min(u, someNodeIndex)] + lmc[someNodeIndex];
+			
 			graph[u][3] = someNodeIndex;
 			
-			/* //debug
+			 //debug
 			Row check_node = { graph[u][0],graph[u][1] };
 			Row current_node = { graph[someNodeIndex][0],graph[someNodeIndex][1] };
 			double val = euc_dist(check_node, current_node);
-			*/
+			//ROS_WARN("val %f", val);
 
 
 			if (gValue[u] - lmc[u] > epsilon)

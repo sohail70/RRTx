@@ -28,7 +28,7 @@ struct N; //forward dec
 Row extend(Matrix& graph, double r, Row& lmc,N& neighbors,nav_msgs::OccupancyGrid mapsub);
 
 //for findParent
-Row findParent(Row current_node, Matrix nearest_nodes, Row dist_to_near_nodes, Row& lmc, vector<int> andix,int current_node_index);
+Row findParent(Row current_node, Matrix nearest_nodes, Row dist_to_near_nodes, Row& lmc, vector<int> andix,int current_node_index,nav_msgs::OccupancyGrid mapsub);
 
 // for neighbors of the current node: it is a matrix because every row is a specific node in which you store the four kind of neghbors
 struct N

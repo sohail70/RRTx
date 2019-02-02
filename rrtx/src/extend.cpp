@@ -23,13 +23,14 @@ Row extend(Matrix &graph, double r, Row &lmc, N &neighbors, nav_msgs::OccupancyG
 	////////////////////////////////////////////////////
 	//obstacle check
 	bool CurrentNodeIsInObs = false; //default value
+	/*
 	if (gridValue(mapsub, current_node) > 0)
 		CurrentNodeIsInObs = true;
-
+*/
 	////////////////////////////////////////////////////
 	bool checkNodeIsInObs = false; //default value
 	////////////////////////////////////////////////////
-
+	//ROS_WARN("flag 1");
 	if (CurrentNodeIsInObs == false)
 	{
 		for (int j = 0; j < i; j++) //loop through all of the graph's nodes ,right before the last node and find the distance of all nodes to the current node
@@ -40,6 +41,7 @@ Row extend(Matrix &graph, double r, Row &lmc, N &neighbors, nav_msgs::OccupancyG
 
 			float val = euc_dist(check_node, current_node);
 			//cout << val << endl; //debug: some times val has some floating point number junc which doesnt goes through the below if loop! //fix: is set it to float to truncate the number a little bit!
+			/*
 			if (val <= r) //costmapObstacleCheck is heavy if you check all the nodes! -->just neighbors is enough!
 			{
 				int check = costmapObstacleCheck(current_node, check_node, mapsub); //if you want to obstacle check with the costmap.
@@ -47,6 +49,7 @@ Row extend(Matrix &graph, double r, Row &lmc, N &neighbors, nav_msgs::OccupancyG
 				if (check == 0)
 					checkNodeIsInObs = true;
 			}
+			*/
 			////////////////////////////////////////////////////////////////
 			if (checkNodeIsInObs == true)
 				new_distance.push_back(numeric_limits<double>::infinity());
@@ -79,11 +82,11 @@ Row extend(Matrix &graph, double r, Row &lmc, N &neighbors, nav_msgs::OccupancyG
 		near_nodess.push_back(graph[andix[j]]);
 	}
 	*/
-
+	//ROS_WARN("flag 2");
 	//Find Parent
 	//vector<double> current_node_with_specified_parent;//deghat kun graph sotone sevomesh andis ijade node hast vali in sotone sevomesh shomare andis marbot be parent node in radif(radife i) hast!
-	graph[i] = findParent(current_node, near_nodes, dist_to_near_nodes, lmc, andix, i);
-	
+	graph[i] = findParent(current_node, near_nodes, dist_to_near_nodes, lmc, andix, i,mapsub);
+	//ROS_WARN("flag 3");
 	if (graph[i][3] == (-1) || CurrentNodeIsInObs == true) //no parent found for the current node or the node is obstacle region---->delete this node from the graph and i must not go up
 	{
 		//deleting process: delete the last row of the graph matrix
@@ -97,6 +100,6 @@ Row extend(Matrix &graph, double r, Row &lmc, N &neighbors, nav_msgs::OccupancyG
 	}
 	//if(fmod(i,1000)==0)//debug
 	//cout << i << endl;// debug
-
+	//ROS_WARN("flag 4");
 	return new_distance;
 }

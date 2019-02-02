@@ -205,6 +205,6 @@ include_directories(
 
 
 add_executable(rrtx src/rrtx.cpp src/functions.cpp src/shrinkingBallRadius.cpp src/saturate.cpp src/extend.cpp src/findParent.cpp 
-src/cullNeighbors.cpp src/rewireNeighbors.cpp src/verrifyQueue.cpp)
+src/cullNeighbors.cpp src/rewireNeighbors.cpp src/verrifyQueue.cpp src/reduceInconsistency.cpp src/updateLmc.cpp)
 target_link_libraries(rrtx ${catkin_LIBRARIES})
 

@@ -60,7 +60,7 @@
 
 
 
-    <node pkg="rrt_control" type="rrt_control" name="control" output="screen">
-    </node>
+    <!--node pkg="rrt_control" type="rrt_control" name="control" output="screen">
+    </node-->
 
 </launch>
