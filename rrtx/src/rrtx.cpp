@@ -19,9 +19,9 @@ tf::Quaternion q;        //robots current quat
 double startThres = 0.1; //if it's too low the rrt keeps planning which sucks!
 
 //////////////////////////////////////////////////////////////////////////
-double x_goal = 10, y_goal = 10;
+double x_goal, y_goal ;
 double x_start, y_start;
-double step_size = 0.5;
+double step_size = 3;
 double robotNode = numeric_limits<double>::infinity();
 bool reachedStart = false;
 double val; //for finding nearest node
@@ -85,15 +85,15 @@ int main(int argc, char **argv)
 
     while (mapData.header.seq < 1 or mapData.data.size() < 1)
     {
-        ROS_WARN("marhale daryafte naghshe!");
+        ROS_INFO("Marhale daryafte naghshe.");
         ros::spinOnce();
         ros::Duration(0.1).sleep();
     }
     while (goalChanged == false)
     {
-        ROS_WARN("waiting");
+        ROS_INFO("Marhale dayafte hadaf az karbar.");
         ros::spinOnce();
-        ros::Duration(1).sleep();
+        ros::Duration(.1).sleep();
     }
 
     //////////////////////////////////VISUALLLLLIZATION///////////////////////////////////////////////////
@@ -118,7 +118,7 @@ int main(int argc, char **argv)
     points.scale.x = 0.08;
     points.scale.y = 0.08;
     // LINE_STRIP/LINE_LIST markers use only the x component of scale, for the line width
-    line_strip.scale.x = 0.08;
+    line_strip.scale.x = 0.15;
     line_list.scale.x = 0.05;
     // Points are green
     points.color.g = 1.0f;
@@ -144,8 +144,8 @@ int main(int argc, char **argv)
     while (ros::ok())
     {
         ///////////////////BALL//////////////////////////////
-        //double r = shrinkingBallRadius(graph.size(), step_size);
-        double r = 1;
+        double r = shrinkingBallRadius(graph.size(), step_size);
+        //double r = 1;
         ///////////////////CURRENT POSE//////////////////////
 
         int temp = 0;
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
         /////////////////GOAL CHANGED: RESET PLANNING//////////////////////////////
         if (goalChanged == true)
         {
-            ROS_WARN("Reset plannnnnnnnnnnnnnning");
+            ROS_INFO("Reset plannnnnnnnnnnnnnning");
             i = 1;
             graph.clear();
             newDist.clear();
@@ -208,8 +208,12 @@ int main(int argc, char **argv)
             points.action = line_strip.action = line_list.action = visualization_msgs::Marker::ADD;
         }
         ////////////////////SAMPLING/////////////////////////
-        double sample_x = randomGenerator(-2, 20);
-        double sample_y = randomGenerator(-2, 6);
+        
+        ////BigMap param /////
+        //double sample_x = randomGenerator(-2, 20);
+        //double sample_y = randomGenerator(-2, 6);
+        double sample_x = randomGenerator(-2, 30);
+        double sample_y = randomGenerator(-2, 30);
         double random = randomGenerator(0, 1);
 
         if (random < 0.12 && reachedStart == false)
@@ -288,18 +292,34 @@ int main(int argc, char **argv)
                 //double value = euc_dist(Row{graph[i][0], graph[i][1]}, Row{x_start, y_start});
                 //ROS_WARN("value: %f", value);
 
-                ROS_WARN("start reacheddddddddddddd");
+               // ROS_WARN("start reacheddddddddddddd");
                 double cond = graph[startIndex][2];
-                ROS_WARN("graph last index: %f", cond);
+                //ROS_WARN("graph last index: %f", cond);
                 int counter = 0;
                 //geometry_msgs::Point p;
                 tree.clear();
-                /*
+
+                /////////////////whole graph visualization//////////////////////////OPTIONAL///////
                 for (int k = 0; k < graph.size(); k++)
                 {
-                    ROS_WARN("graph[%i]  %f %f %f %f %f", k, graph[k][0], graph[k][1], graph[k][2], graph[k][3], lmc[k]);
+                   // ROS_WARN("graph[%i]  %f %f %f %f %f", k, graph[k][0], graph[k][1], graph[k][2], graph[k][3], lmc[k]);
+                    geometry_msgs::Point p;
+                    p.x = graph[k][0];
+                    p.y = graph[k][1];
+                    p.z = 0;
+                    points.points.push_back(p);
+                    //line_strip.points.push_back(p);
+                    double parent_index = graph[k][3];
+                    line_list.points.push_back(p);
+                    p.x = graph[parent_index][0];
+                    p.y = graph[parent_index][1];
+                    p.z = 0;
+                    line_list.points.push_back(p);
+                    
                 }
-                */
+                marker_pub.publish(line_list); //don't put it in the loop above
+                ///////////////////////////////////////////////////////////////////////////////////
+                ////////////////////TREE CONSTRUCTION//////////////////////////////////////////////
                 while (cond > 0)
                 {
                     tree.push_back(Row{graph[cond][0], graph[cond][1]});
@@ -345,7 +365,7 @@ int main(int argc, char **argv)
             i++;
         }
 
-        ROS_WARN("iter %i", i);
+        ROS_INFO_STREAM(i);
         ros::spinOnce();
         rate.sleep();
     }
