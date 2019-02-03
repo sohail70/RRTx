@@ -15,8 +15,8 @@ nav_msgs::OccupancyGrid mapData;
 nav_msgs::OccupancyGrid costmapData;
 bool goalChanged = false;
 double x_rob, y_rob, yaw_rob;
-tf::Quaternion q;        //robots current quat
-double startThres = 0.1; //if it's too low the rrt keeps planning which sucks!
+tf::Quaternion q;        
+double startThres = 0.1; 
 
 //////////////////////////////////////////////////////////////////////////
 double x_goal, y_goal ;
@@ -24,23 +24,17 @@ double x_start, y_start;
 double step_size = 3;
 double robotNode = numeric_limits<double>::infinity();
 bool reachedStart = false;
-double val; //for finding nearest node
-Row dist;   //for finding nearest node-->given to min function
+double val; 
+Row dist;   
 tuple<double, int> min_dist;
-//LMC initilization ...refrence it to the functions!
+
 Row lmc;
-// g_value initialization
 vector<double> gValue;
-// neighbor instance
 N neighbors;
-//there is NewDistance coming out of extend...maybe pass it by reference!
 Row temp_newDist;
 Matrix newDist;
-//Initialization of priority queue
 Matrix Q;
-//epsilon consistent
 double epsilon = 0.05;
-//orphan nodes container
 vector<int> orphansIndex;
 
 /////////////////////////////////////////////////////////////////////////
@@ -66,14 +60,14 @@ int main(int argc, char **argv)
 {
     lmc.push_back(0);
     gValue.push_back(0);
-    //graph initialization
-    Row node = {x_goal, y_goal, 0, 0}; //a node in a tree //initializaton//forth column is yet to be valued!
-    Matrix graph;                      //whole nodes --- graph it self---sotone sevom in index node hengame ijadesh hast//sotone chaharmo parent node hast
-    Matrix tree;                       //shortest tree!
+    //////////////////////////////////////GRAPH INIT////////////////////////////////////
+    Row node = {x_goal, y_goal, 0, 0}; 
+    Matrix graph;                      
+    Matrix tree;                       
 
     graph.push_back(node);
 
-    /////////////////////////////////////
+    ////////////////////////////////////ROS INIT///////////////////////////////////////
     ros::init(argc, argv, "RRTx");
     ros::NodeHandle nh;
     ros::Subscriber costmapSub = nh.subscribe("/costmap_node/costmap/costmap", 100, costMapUpdateCallBack);
@@ -97,7 +91,6 @@ int main(int argc, char **argv)
     }
 
     //////////////////////////////////VISUALLLLLIZATION///////////////////////////////////////////////////
-    ROS_WARN("flag 1");
     //http://wiki.ros.org/rviz/Tutorials/Markers%3A%20Points%20and%20Lines
     //line_strip is for continuous lines but line_list can connect 2 discontinuous points --> engari 2 ta 2 ta posht ham point haro mizari to list
     visualization_msgs::Marker points, line_strip, line_list;
@@ -137,7 +130,7 @@ int main(int argc, char **argv)
     p.z = 0;
     points.points.push_back(p);
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////SLAM POSE//////////////////////////////////////////////////////
     tf::TransformListener listener; //for getting the corrected pose
     tf::StampedTransform transform;
     int i = 1;
@@ -197,7 +190,7 @@ int main(int argc, char **argv)
             points.action = points.DELETEALL;
             line_strip.action = line_strip.DELETEALL;
             line_list.action = line_list.DELETEALL;
-            points.points.clear(); //in khat miheme ke point haye ghabli ro pas az set shodan goal jadid pak mikune!
+            points.points.clear();
             line_list.points.clear();
             line_strip.points.clear();
             geometry_msgs::Point p;
@@ -221,9 +214,9 @@ int main(int argc, char **argv)
         else
             node = {sample_x, sample_y, (double)i, 0};
 
-        ///////////////building the unsaturated graph////////////////
+        /////////////////////////////////BUILDING THE UNSATURATED GRAPH//////////////////////////////
         graph.push_back(node);
-        ///////////////////////finding the nearest node to the current node in order to saturate the node and build the saturated graph
+        /////////////////////////////////FINDING THE NEAREST NODE////////////////////////////////////
         dist.clear();
         for (int j = 0; j < i; j++)
         {
@@ -238,19 +231,18 @@ int main(int argc, char **argv)
         int min_dist_index = get<1>(min_dist);
         Row nearest_node = {graph[min_dist_index][0], graph[min_dist_index][1]};
 
-        //saturate the node
+        //////////////////////////////////SATURATION////////////////////////////////////////////////
         if (min_dist_value > step_size)
         {
             saturate(graph[i], nearest_node, step_size);
         }
-        //ROS_WARN("flag 1");
+        //////////////////////////////////EXTEND////////////////////////////////////////////////////
         temp_newDist = extend(graph, r, lmc, neighbors, costmapData);
         newDist.resize(i);
         newDist.push_back(temp_newDist);
 
-        if (graph.size() - 1 == i) //if the current node added to the tree then count it up//momkene node feli to r nabashe va ma deletesh kunim to extend
+        if (graph.size() - 1 == i)
         {
-            //ROS_WARN("flag 2");
             gValue.push_back(numeric_limits<double>::infinity());
 
             if (gValue[i] - lmc[i] > epsilon)
@@ -260,9 +252,6 @@ int main(int argc, char **argv)
 
                 rewireNeighbors(graph.size() - 1, graph, Q, neighbors, newDist, gValue, lmc, r, epsilon); //why did i used graph.size() instead of i? because graph ending might be deleted but i counter is not updated yet!
             }
-            //ROS_WARN("flag 3");
-            //ROS_WARN("ssssssssssss %f %f %f %f",graph[i][0],graph[i][1],graph[i][2],graph[i][3]);
-
             reduceInconsistency(Q, graph, neighbors, newDist, gValue, lmc, robotNode, r, epsilon, orphansIndex);
             double startIndex;
             /////////////////////////////////REACHED THE START////////////////////////////////
@@ -287,22 +276,14 @@ int main(int argc, char **argv)
                 p.z = 0;
                 points.points.push_back(p);
                 points.action = line_strip.action = line_list.action = visualization_msgs::Marker::ADD;
-                //////
-
-                //double value = euc_dist(Row{graph[i][0], graph[i][1]}, Row{x_start, y_start});
-                //ROS_WARN("value: %f", value);
-
-               // ROS_WARN("start reacheddddddddddddd");
                 double cond = graph[startIndex][2];
                 //ROS_WARN("graph last index: %f", cond);
                 int counter = 0;
-                //geometry_msgs::Point p;
                 tree.clear();
 
-                /////////////////whole graph visualization//////////////////////////OPTIONAL///////
+                /////////////////wWHOLE GRAPH VISUALIZATION//////////////////////////OPTIONAL///////
                 for (int k = 0; k < graph.size(); k++)
                 {
-                   // ROS_WARN("graph[%i]  %f %f %f %f %f", k, graph[k][0], graph[k][1], graph[k][2], graph[k][3], lmc[k]);
                     geometry_msgs::Point p;
                     p.x = graph[k][0];
                     p.y = graph[k][1];
@@ -318,12 +299,10 @@ int main(int argc, char **argv)
                     
                 }
                 marker_pub.publish(line_list); //don't put it in the loop above
-                ///////////////////////////////////////////////////////////////////////////////////
-                ////////////////////TREE CONSTRUCTION//////////////////////////////////////////////
+                ////////////////////TREE CONSTRUCTION///////////////////AND VISUALIZATION///////////////////////////
                 while (cond > 0)
                 {
                     tree.push_back(Row{graph[cond][0], graph[cond][1]});
-                    //ROS_WARN("graph: %f %f %f %f", graph[cond][0], graph[cond][1], graph[cond][2], graph[cond][3]);
                     //RVIZ
                     p.x = tree[counter][0];
                     p.y = tree[counter][1];
@@ -332,7 +311,6 @@ int main(int argc, char **argv)
                     line_strip.points.push_back(p);
                     cond = graph[cond][3];
                     counter++;
-                    //ROS_WARN("flag 1");
                     //ros::Duration(0.09).sleep();
                 }
                 tree.push_back(Row{x_goal, y_goal});
@@ -343,25 +321,6 @@ int main(int argc, char **argv)
                 marker_pub.publish(line_strip); //addition
                 marker_pub.publish(points);
             }
-            /*
-            while (reachedStart == true)
-            {
-                if (euc_dist(Row{graph[i][0], graph[i][1]}, Row{x_start, y_start}) < startThres)
-                {
-                    reachedStart = true;
-                    for (int k = 0; k < tree.size(); k++)
-                        ROS_WARN("tree:  %f %f ", tree[k][0], tree[k][1]);
-                    if (goalChanged == true)
-                        break;
-                }
-                else
-                {
-                    reachedStart = false;
-                }
-                ros::spinOnce();
-                ros::Duration(1).sleep();
-            }
-            */
             i++;
         }
 

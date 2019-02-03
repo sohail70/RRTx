@@ -9,7 +9,7 @@ void rewireNeighbors(int someNodeIndex , Matrix& graph, Matrix& Q, N& neighbors 
 	//MAYBE TODO: there is checker in my MATLAB version which I used in this function---but do i really need it? maybe I should just ignore the 
 	//sampling node which are in newly found obstacles-- or maybe not!
 	
-	//cullNeighbors(graph ,someNodeIndex,neighbors,r,newDist);
+	cullNeighbors(graph ,someNodeIndex,neighbors,r,newDist);
 
 	//parent of someNodeIndex
 	int Parent = graph[someNodeIndex][3]; //index of that parent
