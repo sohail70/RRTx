@@ -21,7 +21,7 @@ double startThres = 0.1;
 //////////////////////////////////////////////////////////////////////////
 double x_goal, y_goal ;
 double x_start, y_start;
-double step_size = 3;
+double step_size = 4;
 double robotNode = numeric_limits<double>::infinity();
 bool reachedStart = false;
 double val; 
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
     {
         ROS_INFO("Marhale dayafte hadaf az karbar.");
         ros::spinOnce();
-        ros::Duration(.1).sleep();
+        //ros::Duration(.1).sleep();
     }
 
     //////////////////////////////////VISUALLLLLIZATION///////////////////////////////////////////////////
@@ -252,7 +252,7 @@ int main(int argc, char **argv)
 
                 rewireNeighbors(graph.size() - 1, graph, Q, neighbors, newDist, gValue, lmc, r, epsilon); //why did i used graph.size() instead of i? because graph ending might be deleted but i counter is not updated yet!
             }
-            reduceInconsistency(Q, graph, neighbors, newDist, gValue, lmc, robotNode, r, epsilon, orphansIndex);
+            //reduceInconsistency(Q, graph, neighbors, newDist, gValue, lmc, robotNode, r, epsilon, orphansIndex);
             double startIndex;
             /////////////////////////////////REACHED THE START////////////////////////////////
             if (euc_dist(Row{graph[i][0], graph[i][1]}, Row{x_start, y_start}) < startThres && enough == true)
