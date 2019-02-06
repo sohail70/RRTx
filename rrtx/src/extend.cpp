@@ -23,10 +23,12 @@ Row extend(Matrix &graph, double r, Row &lmc, N &neighbors, nav_msgs::OccupancyG
 	////////////////////////////////////////////////////
 	//obstacle check
 	bool CurrentNodeIsInObs = false; //default value
-	/*
+	ROS_WARN("cooooooooost %i",gridValue(mapsub, current_node));
 	if (gridValue(mapsub, current_node) > 0)
+	{
 		CurrentNodeIsInObs = true;
-*/
+		ROS_WARN("uselesssss");
+	}
 	////////////////////////////////////////////////////
 	bool checkNodeIsInObs = false; //default value
 	////////////////////////////////////////////////////
@@ -41,7 +43,7 @@ Row extend(Matrix &graph, double r, Row &lmc, N &neighbors, nav_msgs::OccupancyG
 
 			float val = euc_dist(check_node, current_node);
 			//cout << val << endl; //debug: some times val has some floating point number junc which doesnt goes through the below if loop! //fix: is set it to float to truncate the number a little bit!
-			/*
+			checkNodeIsInObs = false;
 			if (val <= r) //costmapObstacleCheck is heavy if you check all the nodes! -->just neighbors is enough!
 			{
 				int check = costmapObstacleCheck(current_node, check_node, mapsub); //if you want to obstacle check with the costmap.
@@ -49,9 +51,9 @@ Row extend(Matrix &graph, double r, Row &lmc, N &neighbors, nav_msgs::OccupancyG
 				if (check == 0)
 					checkNodeIsInObs = true;
 			}
-			*/
+			
 			////////////////////////////////////////////////////////////////
-			if (checkNodeIsInObs == true)
+			if (checkNodeIsInObs == true || val>r)
 				new_distance.push_back(numeric_limits<double>::infinity());
 			else
 				new_distance.push_back(val);
@@ -93,7 +95,6 @@ Row extend(Matrix &graph, double r, Row &lmc, N &neighbors, nav_msgs::OccupancyG
 		Matrix::iterator useless_node;  //useless nodes row index for deletion process
 		useless_node = graph.end() - 1; //-1 is there because end gives us one row past the last row
 		graph.erase(useless_node);
-
 		//deletion process: delete the last element of lmc
 		lmc.erase(lmc.end() - 1);
 		return new_distance;

@@ -15,17 +15,17 @@ nav_msgs::OccupancyGrid mapData;
 nav_msgs::OccupancyGrid costmapData;
 bool goalChanged = false;
 double x_rob, y_rob, yaw_rob;
-tf::Quaternion q;        
-double startThres = 0.1; 
+tf::Quaternion q;
+double startThres = 0.1;
 
 //////////////////////////////////////////////////////////////////////////
-double x_goal, y_goal ;
+double x_goal, y_goal;
 double x_start, y_start;
-double step_size = 3;
+double step_size = 0.75; //for bigmap step is 1 for maze is 0.5
 double robotNode = numeric_limits<double>::infinity();
 bool reachedStart = false;
-double val; 
-Row dist;   
+double val;
+Row dist;
 tuple<double, int> min_dist;
 
 Row lmc;
@@ -34,7 +34,7 @@ N neighbors;
 Row temp_newDist;
 Matrix newDist;
 Matrix Q;
-double epsilon = 0.05;
+double epsilon = 0.1;
 vector<int> orphansIndex;
 
 /////////////////////////////////////////////////////////////////////////
@@ -61,9 +61,9 @@ int main(int argc, char **argv)
     lmc.push_back(0);
     gValue.push_back(0);
     //////////////////////////////////////GRAPH INIT////////////////////////////////////
-    Row node = {x_goal, y_goal, 0, 0}; 
-    Matrix graph;                      
-    Matrix tree;                       
+    Row node = {x_goal, y_goal, 0, 0};
+    Matrix graph;
+    Matrix tree;
 
     graph.push_back(node);
 
@@ -87,14 +87,14 @@ int main(int argc, char **argv)
     {
         ROS_INFO("Marhale dayafte hadaf az karbar.");
         ros::spinOnce();
-        ros::Duration(.1).sleep();
+        //ros::Duration(.1).sleep();
     }
 
     //////////////////////////////////VISUALLLLLIZATION///////////////////////////////////////////////////
     //http://wiki.ros.org/rviz/Tutorials/Markers%3A%20Points%20and%20Lines
     //line_strip is for continuous lines but line_list can connect 2 discontinuous points --> engari 2 ta 2 ta posht ham point haro mizari to list
     visualization_msgs::Marker points, line_strip, line_list;
-    points.header.frame_id = line_strip.header.frame_id = line_list.header.frame_id = mapData.header.frame_id; //or "/map"
+    points.header.frame_id = line_strip.header.frame_id = line_list.header.frame_id = costmapData.header.frame_id;//or "/map"
     points.header.stamp = line_strip.header.stamp = line_list.header.stamp = ros::Time::now();
     points.ns = line_strip.ns = line_list.ns = "points_and_lines";
     points.action = line_strip.action = line_list.action = visualization_msgs::Marker::ADD;
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
     points.scale.x = 0.08;
     points.scale.y = 0.08;
     // LINE_STRIP/LINE_LIST markers use only the x component of scale, for the line width
-    line_strip.scale.x = 0.15;
+    line_strip.scale.x = 0.13;
     line_list.scale.x = 0.05;
     // Points are green
     points.color.g = 1.0f;
@@ -137,8 +137,8 @@ int main(int argc, char **argv)
     while (ros::ok())
     {
         ///////////////////BALL//////////////////////////////
-        double r = shrinkingBallRadius(graph.size(), step_size);
-        //double r = 1;
+        //double r = shrinkingBallRadius(graph.size(), step_size);
+        double r = 1;
         ///////////////////CURRENT POSE//////////////////////
 
         int temp = 0;
@@ -201,12 +201,16 @@ int main(int argc, char **argv)
             points.action = line_strip.action = line_list.action = visualization_msgs::Marker::ADD;
         }
         ////////////////////SAMPLING/////////////////////////
-        
+
         ////BigMap param /////
         //double sample_x = randomGenerator(-2, 20);
         //double sample_y = randomGenerator(-2, 6);
-        double sample_x = randomGenerator(-2, 30);
-        double sample_y = randomGenerator(-2, 30);
+
+        ////maze param /////
+        double sample_x = randomGenerator(-1, 10);
+        double sample_y = randomGenerator(-2, 9);
+        //double sample_x = randomGenerator(-2, 30);
+        //double sample_y = randomGenerator(-2, 30);
         double random = randomGenerator(0, 1);
 
         if (random < 0.12 && reachedStart == false)
@@ -250,9 +254,9 @@ int main(int argc, char **argv)
                 //if vIsObstacleFree
                 verrifyQueue(Q, gValue[graph.size() - 1], lmc[graph.size() - 1], graph.size() - 1);
 
-                rewireNeighbors(graph.size() - 1, graph, Q, neighbors, newDist, gValue, lmc, r, epsilon); //why did i used graph.size() instead of i? because graph ending might be deleted but i counter is not updated yet!
+                rewireNeighbors(graph.size() - 1, graph, Q, neighbors, newDist, gValue, lmc, r, epsilon,costmapData); //why did i used graph.size() instead of i? because graph ending might be deleted but i counter is not updated yet!
             }
-            reduceInconsistency(Q, graph, neighbors, newDist, gValue, lmc, robotNode, r, epsilon, orphansIndex);
+            reduceInconsistency(Q, graph, neighbors, newDist, gValue, lmc, robotNode, r, epsilon, orphansIndex,costmapData);
             double startIndex;
             /////////////////////////////////REACHED THE START////////////////////////////////
             if (euc_dist(Row{graph[i][0], graph[i][1]}, Row{x_start, y_start}) < startThres && enough == true)
@@ -296,7 +300,6 @@ int main(int argc, char **argv)
                     p.y = graph[parent_index][1];
                     p.z = 0;
                     line_list.points.push_back(p);
-                    
                 }
                 marker_pub.publish(line_list); //don't put it in the loop above
                 ////////////////////TREE CONSTRUCTION///////////////////AND VISUALIZATION///////////////////////////

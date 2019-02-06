@@ -46,13 +46,13 @@ struct N
 void verrifyQueue(Matrix& Q , double gValue , double lmc , double node);
 
 //for rewireNeighbors
-void rewireNeighbors(int someNodeIndex, Matrix& graph, Matrix& Q, N& neighbors, Matrix newDist, Row gValue, Row& lmc, double r, double epsilon);
+void rewireNeighbors(int someNodeIndex, Matrix& graph, Matrix& Q, N& neighbors, Matrix newDist, Row gValue, Row& lmc, double r, double epsilon,nav_msgs::OccupancyGrid mapsub);
 
 //for culling neighbors
 void cullNeighbors(Matrix graph, double someNodeIndex, N& neighbors, double r, Matrix newDist);
 
 //for reduceInconsistency
-int reduceInconsistency(Matrix& Q, Matrix& graph, N& neighbors, Matrix newDist, Row& gValue, Row& lmc, double robotNode, double r, double epsilon, vector<int> orphansIndex);
+int reduceInconsistency(Matrix& Q, Matrix& graph, N& neighbors, Matrix newDist, Row& gValue, Row& lmc, double robotNode, double r, double epsilon, vector<int> orphansIndex,nav_msgs::OccupancyGrid mapsub);
 
 //for updateLmc
 void updateLmc(int someNodeIndex, Matrix& graph, Matrix newDist, N neighbors, Row& lmc, double r, vector<int> orphansIndex);

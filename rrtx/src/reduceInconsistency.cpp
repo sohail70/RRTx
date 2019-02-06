@@ -3,7 +3,7 @@
 #include <algorithm>
 
 //Check it piece by piece!
-int reduceInconsistency(Matrix& Q,Matrix& graph,N& neighbors, Matrix newDist , Row& gValue , Row& lmc , double robotNode , double r, double epsilon, vector<int> orphansIndex)
+int reduceInconsistency(Matrix& Q,Matrix& graph,N& neighbors, Matrix newDist , Row& gValue , Row& lmc , double robotNode , double r, double epsilon, vector<int> orphansIndex,nav_msgs::OccupancyGrid mapsub)
 {
 	bool isVbotInQueue; //robots node is important! so if it is in the priority queue! make it
 	Row checker;
@@ -70,7 +70,7 @@ int reduceInconsistency(Matrix& Q,Matrix& graph,N& neighbors, Matrix newDist , R
 		if (gValue[Q[0][2]] - lmc[Q[0][2]] > epsilon) //Q[0][2] is the node Index That we must make consistent---> Q[0][2] is the v in reduceInconsistency algorithm in the paper!
 		{
 			updateLmc(Q[0][2],graph, newDist,neighbors,lmc, r, orphansIndex);
-			rewireNeighbors((int)Q[0][2], graph, Q, neighbors, newDist, gValue, lmc, r, epsilon); //check for pass by reference values (use the paper!)
+			rewireNeighbors((int)Q[0][2], graph, Q, neighbors, newDist, gValue, lmc, r, epsilon,mapsub); //check for pass by reference values (use the paper!)
 		}
 		gValue[Q[0][2]] = lmc[Q[0][2]];
 		
