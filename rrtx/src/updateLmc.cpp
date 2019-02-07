@@ -4,11 +4,13 @@
 //CHECK it PIECE BY PIECE!
 void updateLmc(int someNodeIndex, Matrix& graph ,Matrix newDist,N neighbors ,Row& lmc , double r , vector<int> orphansIndex)
 {
-	cullNeighbors(graph, someNodeIndex, neighbors, r, newDist);
-	
+	//ROS_WARN("q");
+	//cullNeighbors(graph, someNodeIndex, neighbors, r, newDist);
+	ROS_WARN("alooo %i",someNodeIndex);
 
 	vector<int> wholePlusNeighbors;//(original+running) plus neighbors of someNodeIndex
 	wholePlusNeighbors = neighbors.original_plus.at(someNodeIndex);
+	ROS_WARN("alooo2");
 	for (int i = 0; i < neighbors.running_plus.at(someNodeIndex).size(); i++) //adding the running plus to the original ones to have a PLUS PACKAGE
 	{
 		wholePlusNeighbors.push_back(neighbors.running_plus.at(someNodeIndex).at(i));
@@ -27,7 +29,7 @@ void updateLmc(int someNodeIndex, Matrix& graph ,Matrix newDist,N neighbors ,Row
 	}
 
 
-
+//ROS_WARN("w");
 
 	for (int i = 0; i < wholePlusNeighbors.size(); i++)
 	{
@@ -42,5 +44,5 @@ void updateLmc(int someNodeIndex, Matrix& graph ,Matrix newDist,N neighbors ,Row
 		//I think rewireNeighbor takes care of it and its reduntant doing it here but I'm not sure!
 
 	}
-
+//ROS_WARN("e");
 }

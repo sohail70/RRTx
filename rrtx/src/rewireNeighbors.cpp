@@ -8,8 +8,8 @@ void rewireNeighbors(int someNodeIndex, Matrix &graph, Matrix &Q, N &neighbors, 
 {
 	//MAYBE TODO: there is checker in my MATLAB version which I used in this function---but do i really need it? maybe I should just ignore the
 	//sampling node which are in newly found obstacles-- or maybe not!
-
-	cullNeighbors(graph, someNodeIndex, neighbors, r, newDist);
+	ROS_WARN("alef");
+	//cullNeighbors(graph, someNodeIndex, neighbors, r, newDist);
 
 	//parent of someNodeIndex
 	int Parent = graph[someNodeIndex][3]; //index of that parent
@@ -28,7 +28,7 @@ void rewireNeighbors(int someNodeIndex, Matrix &graph, Matrix &Q, N &neighbors, 
 	vector<int>::iterator deletingParent;
 	deletingParent = wholeMinusNeighbors.begin() + whichOne;
 	wholeMinusNeighbors.erase(deletingParent);
-
+	//ROS_WARN("beee");
 	for (int j = 0; j < wholeMinusNeighbors.size(); j++) //wholeMinusNeighbors is a vector of indexes of neighbor nodes of someIndexNode except the parent node of a someIndexNode
 	{
 
@@ -57,4 +57,5 @@ void rewireNeighbors(int someNodeIndex, Matrix &graph, Matrix &Q, N &neighbors, 
 				verrifyQueue(Q, gValue[u], lmc[u], u);
 		}
 	}
+	//ROS_WARN("peeee");
 }

@@ -3,7 +3,6 @@ project(optimized_rapid_random_tree)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
-
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -205,6 +204,6 @@ include_directories(
 
 
 add_executable(rrtx src/rrtx.cpp src/functions.cpp src/shrinkingBallRadius.cpp src/saturate.cpp src/extend.cpp src/findParent.cpp 
-src/cullNeighbors.cpp src/rewireNeighbors.cpp src/verrifyQueue.cpp src/reduceInconsistency.cpp src/updateLmc.cpp)
+src/cullNeighbors.cpp src/rewireNeighbors.cpp src/verrifyQueue.cpp src/reduceInconsistency.cpp src/updateLmc.cpp src/addNewObstacle.cpp src/propagateDescendants.cpp src/verrifyOrphan.cpp src/updateObstacles.cpp)
 target_link_libraries(rrtx ${catkin_LIBRARIES})
 

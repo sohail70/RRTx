@@ -5,10 +5,13 @@ using namespace std;
 //MUST BE CHECKED PIECE BY PIECE!!!!!!
 void cullNeighbors(Matrix graph , double someNodeIndex , N& neighbors , double r , Matrix newDist)
 {
+	//ROS_WARN("qqq");
 	int size = neighbors.running_plus[someNodeIndex].size();
 	int i = 0;
+
 	while(i<size)
 	{
+		
 		double neigh = neighbors.running_plus[someNodeIndex].at(i); //node index of the i'th neighbor of someNodeIndex
 		//newDist has a unique logic inside it so I need to be carefull and check before
 		//indexing inside it-->so use MIN and MAX function
@@ -19,7 +22,7 @@ void cullNeighbors(Matrix graph , double someNodeIndex , N& neighbors , double r
 			deletingNeigh = neighbors.running_plus.at(someNodeIndex).begin()+i;//I guess begin must be there to make it an iterator
 			neighbors.running_plus.at(someNodeIndex).erase(deletingNeigh); //deleting u from running neighbors of v---> because r is decreased now
 			
-
+//ROS_WARN("qqqqqq");
 			int whichOne = findInVec(neighbors.running_minus.at(neigh), someNodeIndex);
 			if (whichOne != -1)
 			{
@@ -35,4 +38,5 @@ void cullNeighbors(Matrix graph , double someNodeIndex , N& neighbors , double r
 		}
 		
 	}
+	//ROS_WARN("qqqqqqqqqqqqqqqqq");
 }

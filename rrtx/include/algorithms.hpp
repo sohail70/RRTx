@@ -59,13 +59,13 @@ void updateLmc(int someNodeIndex, Matrix& graph, Matrix newDist, N neighbors, Ro
 
 
 //for updateObstacles
-void updateObstacles(obstacle& obsSet, Matrix& graph, Matrix& Q, N& neighbors, Matrix& newDist, Row gValue, Row& lmc, vector<int> orphansIndex, double r, double epsilon, double robotNode, double safetyFactor);
+void updateObstacles(nav_msgs::OccupancyGrid mapsub, Matrix& graph, Matrix& Q, N& neighbors, Matrix& newDist, Row gValue, Row& lmc, vector<int> orphansIndex, double r, double epsilon, double robotNode,vector<double> closeNodesIndex);
 
 //for removing an obstacle
-void removeObstacle(obstacle& obsSet, Matrix& graph, Matrix& Q, N& neighbors, Matrix& newDist, Row gValue, Row& lmc, double r, vector<int> orphansIndex, double safetyFactor);
+void removeObstacle(nav_msgs::OccupancyGrid mapsub, Matrix& graph, Matrix& Q, N& neighbors, Matrix& newDist, Row gValue, Row& lmc, double r, vector<int> orphansIndex);
 
 //for adding an obstacle
-void addNewObstacle(obstacle& obsSet, Matrix& graph, Matrix& Q, N& neighbors, Matrix& newDist, Row gValue, Row& lmc, double r, vector<int>& orphansIndex, double robotNode, double safetyFactor);
+void addNewObstacle(nav_msgs::OccupancyGrid mapsub, Matrix& graph, Matrix& Q, N& neighbors, Matrix& newDist, Row gValue, Row& lmc, double r, vector<int>& orphansIndex, double robotNode,vector<double> closeNodesIndex);
 
 //for propagating to the childs
 void propagateDescendants(Matrix& graph, Matrix& Q, N& neighbors, vector<int>& orphansIndex, Row& gValue, Row& lmc);

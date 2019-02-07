@@ -23,11 +23,11 @@ Row extend(Matrix &graph, double r, Row &lmc, N &neighbors, nav_msgs::OccupancyG
 	////////////////////////////////////////////////////
 	//obstacle check
 	bool CurrentNodeIsInObs = false; //default value
-	ROS_WARN("cooooooooost %i",gridValue(mapsub, current_node));
+	//ROS_WARN("cost %i",gridValue(mapsub, current_node));
 	if (gridValue(mapsub, current_node) > 0)
 	{
 		CurrentNodeIsInObs = true;
-		ROS_WARN("uselesssss");
+		//ROS_WARN("uselesssss");
 	}
 	////////////////////////////////////////////////////
 	bool checkNodeIsInObs = false; //default value

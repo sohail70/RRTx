@@ -67,11 +67,16 @@ int reduceInconsistency(Matrix& Q,Matrix& graph,N& neighbors, Matrix newDist , R
 	//Now the algorithm----> may be before obstacle detection there shoudl'nt be any reduce inconsistency! what's the point? huh!-->make conditions false!
 	while ( Q.size() > 0 &&   (shouldReduce ||isRobNodeInconsistent || robGvalueCheck || isVbotInQueue) )
 	{
+		//ROS_WARN("1");
 		if (gValue[Q[0][2]] - lmc[Q[0][2]] > epsilon) //Q[0][2] is the node Index That we must make consistent---> Q[0][2] is the v in reduceInconsistency algorithm in the paper!
 		{
+			//ROS_WARN("2");
 			updateLmc(Q[0][2],graph, newDist,neighbors,lmc, r, orphansIndex);
+			//ROS_WARN("3");
 			rewireNeighbors((int)Q[0][2], graph, Q, neighbors, newDist, gValue, lmc, r, epsilon,mapsub); //check for pass by reference values (use the paper!)
+			//ROS_WARN("4");
 		}
+		
 		gValue[Q[0][2]] = lmc[Q[0][2]];
 		
 		//delete the first row of the Queue
@@ -107,7 +112,6 @@ int reduceInconsistency(Matrix& Q,Matrix& graph,N& neighbors, Matrix newDist , R
 		}
 		counter += 1;
 	}
-
 
 	return counter;
 }
