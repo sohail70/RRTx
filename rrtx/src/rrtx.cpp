@@ -37,6 +37,7 @@ Matrix Q;
 double epsilon = 0.1;
 vector<int> orphansIndex;
 vector<double> closeNodesIndexStore;
+bool noTree = false;
 /////////////////////////////////////////////////////////////////////////
 void mapUpdateCallBack(const nav_msgs::OccupancyGrid::ConstPtr &map_msg)
 {
@@ -222,7 +223,7 @@ int main(int argc, char **argv)
         {
             closeNodesIndexStore = closeNodesIndex;
             //for (int t = 0; t < closeNodesIndexStore.size(); t++)
-              //  ROS_WARN("flag 11111111111 %f", closeNodesIndexStore[t]);
+            //  ROS_WARN("flag 11111111111 %f", closeNodesIndexStore[t]);
             shouldUpdateObs = true;
         }
         else
@@ -232,15 +233,15 @@ int main(int argc, char **argv)
                                 std::inserter(diff, diff.begin()));
             closeNodesIndexStore = closeNodesIndex;
             closeNodesIndex = diff;
-           // for (int t = 0; t < diff.size(); t++)
-              //  ROS_WARN("flag 22222222222222222222 %f", diff[t]);
+            // for (int t = 0; t < diff.size(); t++)
+            //  ROS_WARN("flag 22222222222222222222 %f", diff[t]);
 
             if (!closeNodesIndex.empty())
                 shouldUpdateObs = true;
         }
 
         if (shouldUpdateObs == true)
-           updateObstacles(costmapData, graph, Q, neighbors, newDist, gValue, lmc, orphansIndex, r, epsilon, robotNode, closeNodesIndex);
+            updateObstacles(costmapData, graph, Q, neighbors, newDist, gValue, lmc, orphansIndex, r, epsilon, robotNode, closeNodesIndex);
 
         if (i < 500)
         {
@@ -350,8 +351,15 @@ int main(int argc, char **argv)
                     }
                     marker_pub.publish(line_list); //don't put it in the loop above
                     ////////////////////TREE CONSTRUCTION///////////////////AND VISUALIZATION///////////////////////////
+                    noTree = false;
                     while (cond > 0)
                     {
+                        if (graph[cond][3] == numeric_limits<double>::infinity())
+                        {
+                            ROS_WARN("NO TREE");
+                            noTree = true;
+                            break;
+                        }
                         tree.push_back(Row{graph[cond][0], graph[cond][1]});
                         //RVIZ
                         p.x = tree[counter][0];
@@ -363,11 +371,18 @@ int main(int argc, char **argv)
                         counter++;
                         //ros::Duration(0.09).sleep();
                     }
-                    tree.push_back(Row{x_goal, y_goal});
-                    p.x = x_goal;
-                    p.y = y_goal;
-                    p.z = 0;
-                    line_strip.points.push_back(p);
+                    if (noTree == false)
+                    {
+                        tree.push_back(Row{x_goal, y_goal});
+                        p.x = x_goal;
+                        p.y = y_goal;
+                        p.z = 0;
+                        line_strip.points.push_back(p);
+                    }
+                    else
+                    {
+                        line_strip.points.clear();
+                    }
                     marker_pub.publish(line_strip); //addition
                     marker_pub.publish(points);
                 }
@@ -418,8 +433,15 @@ int main(int argc, char **argv)
                 }
                 marker_pub.publish(line_list); //don't put it in the loop above
                 ////////////////////TREE CONSTRUCTION///////////////////AND VISUALIZATION///////////////////////////
+                noTree = false;
                 while (cond > 0)
                 {
+                    if (graph[cond][3] == numeric_limits<double>::infinity())
+                    {
+                        ROS_WARN("NO TREEEEEEEEE");
+                        noTree = true;
+                        break;
+                    }
                     tree.push_back(Row{graph[cond][0], graph[cond][1]});
                     //RVIZ
                     p.x = tree[counter][0];
@@ -431,17 +453,25 @@ int main(int argc, char **argv)
                     counter++;
                     //ros::Duration(0.09).sleep();
                 }
-                tree.push_back(Row{x_goal, y_goal});
-                p.x = x_goal;
-                p.y = y_goal;
-                p.z = 0;
-                line_strip.points.push_back(p);
+                if (noTree == false)
+                {
+                    tree.push_back(Row{x_goal, y_goal});
+                    p.x = x_goal;
+                    p.y = y_goal;
+                    p.z = 0;
+                    line_strip.points.push_back(p);
+                }
+                else
+                {
+
+                    line_strip.points.clear();
+                }
                 marker_pub.publish(line_strip); //addition
                 marker_pub.publish(points);
             }
         }
 
-        ROS_INFO_STREAM(i);
+        //ROS_INFO_STREAM(i);
         ros::spinOnce();
         rate.sleep();
     }

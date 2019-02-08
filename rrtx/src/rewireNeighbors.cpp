@@ -25,9 +25,12 @@ void rewireNeighbors(int someNodeIndex, Matrix &graph, Matrix &Q, N &neighbors, 
 	//deleting the parent index from wholeMinusNeighbors indexes--->we could have used If statement in the next loop and didn't bother with the findInvec nonsense :(
 
 	int whichOne = findInVec(wholeMinusNeighbors, Parent);
-	vector<int>::iterator deletingParent;
-	deletingParent = wholeMinusNeighbors.begin() + whichOne;
-	wholeMinusNeighbors.erase(deletingParent);
+	if (whichOne != -1)
+	{
+		vector<int>::iterator deletingParent;
+		deletingParent = wholeMinusNeighbors.begin() + whichOne;
+		wholeMinusNeighbors.erase(deletingParent);
+	}
 	//ROS_WARN("beee");
 	for (int j = 0; j < wholeMinusNeighbors.size(); j++) //wholeMinusNeighbors is a vector of indexes of neighbor nodes of someIndexNode except the parent node of a someIndexNode
 	{
@@ -38,7 +41,7 @@ void rewireNeighbors(int someNodeIndex, Matrix &graph, Matrix &Q, N &neighbors, 
 		{
 			//update the lmc of neighbor node--> because someNodeIndex gives u a better path
 			//	ROS_WARN("yes,changed the parent of %i from %f to %i and before lmc:%f newlmc:%f",u,graph[u][3],someNodeIndex,lmc[u],newDist[max(u, someNodeIndex)][min(u, someNodeIndex)] + lmc[someNodeIndex]);
-			int check = costmapObstacleCheck(Row{graph[u][0],graph[u][1]}, Row{graph[someNodeIndex][0],graph[someNodeIndex][1]}, mapsub); //if you want to obstacle check with the costmap.
+			int check = costmapObstacleCheck(Row{graph[u][0], graph[u][1]}, Row{graph[someNodeIndex][0], graph[someNodeIndex][1]}, mapsub); //if you want to obstacle check with the costmap.
 			//is the check_node(previus nodes) in obs?if it is, newDist->inf
 			if (check == 0)
 				ROS_WARN("shiiiiiiiiiiiiiiiiiiiiiiiit");
