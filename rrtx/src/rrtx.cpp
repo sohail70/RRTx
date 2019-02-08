@@ -1,6 +1,3 @@
-//TODO : build the trajectory tree and plot it in rviz
-//TODO : obstacles must be checked very carefully!
-//TODO : May be I should reset planning when ever new map is recieved! what you say?!
 #include "std_msgs/String.h"
 #include <sstream>
 #include <iostream>
@@ -10,7 +7,7 @@
 #include "functions.hpp"
 #include "algorithms.hpp"
 bool enough = true;
-//////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 nav_msgs::OccupancyGrid mapData;
 nav_msgs::OccupancyGrid costmapData;
 bool goalChanged = false;
@@ -21,7 +18,7 @@ double startThres = 0.1;
 //////////////////////////////////////////////////////////////////////////
 double x_goal, y_goal;
 double x_start, y_start;
-double step_size = 0.75; //for bigmap step is 1 for maze is 0.5
+double step_size = 1; //for bigmap step is 1 for maze is 0.75
 double robotNode = numeric_limits<double>::infinity();
 bool reachedStart = false;
 double val;
@@ -157,7 +154,7 @@ int main(int argc, char **argv)
             }
         }
 
-        x_rob = transform.getOrigin().x(); //robots current position --> Corrected position from SLAM
+        x_rob = transform.getOrigin().x();
         y_rob = transform.getOrigin().y();
         q = transform.getRotation();
         yaw_rob = tf::getYaw(q);
@@ -207,35 +204,25 @@ int main(int argc, char **argv)
         /////////////////////////UPDATE OBSTACLES!/////////////////////
         bool shouldUpdateObs = false;
         vector<double> closeNodesIndex;
-        //TODO:-->MY idea: faghat dakhele sensor radius obstacle set haroo negah kunim!...har moghe az senRad kharej shodi  obs ha remove she!
         vector<double> diff;
 
         for (int count = 0; count < graph.size(); count++)
-        { //TODO: I don't have to calculate the dist to all of the obstacles! just the added ones is enough!
+        {
 
             if (gridValue(costmapData, Row{graph[count][0], graph[count][1]}) > 0)
-            {
                 closeNodesIndex.push_back(graph[count][2]);
-                //ROS_WARN("close node index %f", graph[j][2]);
-            }
         }
         if (closeNodesIndexStore.empty())
         {
             closeNodesIndexStore = closeNodesIndex;
-            //for (int t = 0; t < closeNodesIndexStore.size(); t++)
-            //  ROS_WARN("flag 11111111111 %f", closeNodesIndexStore[t]);
             shouldUpdateObs = true;
         }
         else
         {
-            //closeNodesIndexStore = closeNodesIndex - closeNodesIndexStore ;
             std::set_difference(closeNodesIndex.begin(), closeNodesIndex.end(), closeNodesIndexStore.begin(), closeNodesIndexStore.end(),
                                 std::inserter(diff, diff.begin()));
             closeNodesIndexStore = closeNodesIndex;
             closeNodesIndex = diff;
-            // for (int t = 0; t < diff.size(); t++)
-            //  ROS_WARN("flag 22222222222222222222 %f", diff[t]);
-
             if (!closeNodesIndex.empty())
                 shouldUpdateObs = true;
         }
@@ -296,13 +283,10 @@ int main(int argc, char **argv)
 
                 if (gValue[i] - lmc[i] > epsilon)
                 {
-                    //if vIsObstacleFree
                     verrifyQueue(Q, gValue[graph.size() - 1], lmc[graph.size() - 1], graph.size() - 1);
-
-                    rewireNeighbors(graph.size() - 1, graph, Q, neighbors, newDist, gValue, lmc, r, epsilon, costmapData); //why did i used graph.size() instead of i? because graph ending might be deleted but i counter is not updated yet!
+                    rewireNeighbors(graph.size() - 1, graph, Q, neighbors, newDist, gValue, lmc, r, epsilon, costmapData);
                 }
                 reduceInconsistency(Q, graph, neighbors, newDist, gValue, lmc, robotNode, r, epsilon, orphansIndex, costmapData);
-                //double startIndex;
                 /////////////////////////////////REACHED THE START////////////////////////////////
                 if (euc_dist(Row{graph[i][0], graph[i][1]}, Row{x_start, y_start}) < startThres && enough == true)
                 {
@@ -316,7 +300,7 @@ int main(int argc, char **argv)
                     points.action = points.DELETEALL;
                     line_strip.action = line_strip.DELETEALL;
                     line_list.action = line_list.DELETEALL;
-                    points.points.clear(); //in khat miheme ke point haye ghabli ro pas az set shodan goal jadid pak mikune!
+                    points.points.clear();
                     line_list.points.clear();
                     line_strip.points.clear();
                     geometry_msgs::Point p;
@@ -326,7 +310,6 @@ int main(int argc, char **argv)
                     points.points.push_back(p);
                     points.action = line_strip.action = line_list.action = visualization_msgs::Marker::ADD;
                     double cond = graph[robotNode][2];
-                    //ROS_WARN("graph last index: %f", cond);
                     int counter = 0;
                     tree.clear();
 
@@ -340,7 +323,6 @@ int main(int argc, char **argv)
                             p.y = graph[k][1];
                             p.z = 0;
                             points.points.push_back(p);
-                            //line_strip.points.push_back(p);
                             double parent_index = graph[k][3];
                             line_list.points.push_back(p);
                             p.x = graph[parent_index][0];
@@ -349,7 +331,7 @@ int main(int argc, char **argv)
                             line_list.points.push_back(p);
                         }
                     }
-                    marker_pub.publish(line_list); //don't put it in the loop above
+                    marker_pub.publish(line_list);
                     ////////////////////TREE CONSTRUCTION///////////////////AND VISUALIZATION///////////////////////////
                     noTree = false;
                     while (cond > 0)
@@ -361,7 +343,7 @@ int main(int argc, char **argv)
                             break;
                         }
                         tree.push_back(Row{graph[cond][0], graph[cond][1]});
-                        //RVIZ
+
                         p.x = tree[counter][0];
                         p.y = tree[counter][1];
                         p.z = 0;
@@ -398,7 +380,7 @@ int main(int argc, char **argv)
                 points.action = points.DELETEALL;
                 line_strip.action = line_strip.DELETEALL;
                 line_list.action = line_list.DELETEALL;
-                points.points.clear(); //in khat miheme ke point haye ghabli ro pas az set shodan goal jadid pak mikune!
+                points.points.clear();
                 line_list.points.clear();
                 line_strip.points.clear();
                 geometry_msgs::Point p;
@@ -408,7 +390,7 @@ int main(int argc, char **argv)
                 points.points.push_back(p);
                 points.action = line_strip.action = line_list.action = visualization_msgs::Marker::ADD;
                 double cond = graph[robotNode][2];
-                //ROS_WARN("graph last index: %f", cond);
+
                 int counter = 0;
                 tree.clear();
 
@@ -422,7 +404,7 @@ int main(int argc, char **argv)
                         p.y = graph[k][1];
                         p.z = 0;
                         points.points.push_back(p);
-                        //line_strip.points.push_back(p);
+
                         double parent_index = graph[k][3];
                         line_list.points.push_back(p);
                         p.x = graph[parent_index][0];
@@ -431,7 +413,7 @@ int main(int argc, char **argv)
                         line_list.points.push_back(p);
                     }
                 }
-                marker_pub.publish(line_list); //don't put it in the loop above
+                marker_pub.publish(line_list);
                 ////////////////////TREE CONSTRUCTION///////////////////AND VISUALIZATION///////////////////////////
                 noTree = false;
                 while (cond > 0)
@@ -471,7 +453,7 @@ int main(int argc, char **argv)
             }
         }
 
-        //ROS_INFO_STREAM(i);
+        ROS_INFO_STREAM(r);
         ros::spinOnce();
         rate.sleep();
     }

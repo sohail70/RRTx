@@ -1,22 +1,20 @@
 #include "algorithms.hpp"
 #include <algorithm>
 
-//CHECK it PIECE BY PIECE!
 void updateLmc(int someNodeIndex, Matrix& graph ,Matrix newDist,N neighbors ,Row& lmc , double r , vector<int> orphansIndex)
 {
-	//ROS_WARN("q");
-	//cullNeighbors(graph, someNodeIndex, neighbors, r, newDist);
-	ROS_WARN("alooo %i",someNodeIndex);
+	
+	cullNeighbors(graph, someNodeIndex, neighbors, r, newDist);
 
-	vector<int> wholePlusNeighbors;//(original+running) plus neighbors of someNodeIndex
+	vector<int> wholePlusNeighbors;
 	wholePlusNeighbors = neighbors.original_plus.at(someNodeIndex);
-	ROS_WARN("alooo2");
-	for (int i = 0; i < neighbors.running_plus.at(someNodeIndex).size(); i++) //adding the running plus to the original ones to have a PLUS PACKAGE
+	
+	for (int i = 0; i < neighbors.running_plus.at(someNodeIndex).size(); i++) 
 	{
 		wholePlusNeighbors.push_back(neighbors.running_plus.at(someNodeIndex).at(i));
 	}
 	
-	//deleting the orphanNodes Index from wholePlusNeighbors
+	
 	vector<int>::iterator deletingOrphans;
 	for (int i = 0; i < orphansIndex.size(); i++)
 	{
@@ -24,25 +22,18 @@ void updateLmc(int someNodeIndex, Matrix& graph ,Matrix newDist,N neighbors ,Row
 		if (whichOne != -1)
 		{
 			deletingOrphans = wholePlusNeighbors.begin() + whichOne;
-			wholePlusNeighbors.erase(deletingOrphans); //albate in har bar ye element ro kam mikune
-		}//vali jaye negarani nist chon dar har tekrar, whichOne dar vector fe@li donbale index migarde!
+			wholePlusNeighbors.erase(deletingOrphans);
+		}
 	}
-
-
-//ROS_WARN("w");
 
 	for (int i = 0; i < wholePlusNeighbors.size(); i++)
 	{
 		int u = wholePlusNeighbors[i];
-		if (graph[u][3] != someNodeIndex) //age parent(u) !=v bod
+		if (graph[u][3] != someNodeIndex)
 			if (lmc[someNodeIndex] > newDist[max(u, someNodeIndex)][min(u, someNodeIndex)] + lmc[u])
 			{
 				graph[someNodeIndex][3] = u;
 				lmc[someNodeIndex] = newDist[max(u, someNodeIndex)][min(u, someNodeIndex)] + lmc[u];
 			}
-		//should I calculate the lmc LIKE in MY MATLAB version!?? i guess you should! because it doesn't get updated any where else!
-		//I think rewireNeighbor takes care of it and its reduntant doing it here but I'm not sure!
-
 	}
-//ROS_WARN("e");
 }
