@@ -5,7 +5,7 @@
 void rewireNeighbors(int someNodeIndex, Matrix &graph, Matrix &Q, N &neighbors, Matrix newDist, Row gValue, Row &lmc, double r, double epsilon, nav_msgs::OccupancyGrid mapsub)
 {
 
-	cullNeighbors(graph, someNodeIndex, neighbors, r, newDist);
+	//cullNeighbors(graph, someNodeIndex, neighbors, r, newDist);
 
 	int Parent = graph[someNodeIndex][3];
 
@@ -25,6 +25,49 @@ void rewireNeighbors(int someNodeIndex, Matrix &graph, Matrix &Q, N &neighbors, 
 		wholeMinusNeighbors.erase(deletingParent);
 	}
 
+	///////////////////////DELETE FUCKED UP NEIGHBORS////////////////////////////////
+/*
+	int segs = 3;
+	for (int q = 0; q < wholeMinusNeighbors.size(); q++)
+	{
+
+		//double parentIndex = graph[count][3];
+		int checkCur = gridValue(mapsub, Row{graph[someNodeIndex][0], graph[someNodeIndex][1]});
+		int checkPar = gridValue(mapsub, Row{graph[wholeMinusNeighbors[q]][0], graph[wholeMinusNeighbors[q]][1]});
+		int checkSeg;
+		for (int j = 0; j < segs; j++)
+		{
+			double x, y;
+			x = (j / segs) * (graph[someNodeIndex][0] + graph[wholeMinusNeighbors[q]][0]);
+			y = (j / segs) * (graph[someNodeIndex][1] + graph[wholeMinusNeighbors[q]][1]);
+			checkSeg = gridValue(mapsub, Row{x, y});
+			if (checkSeg > 0)
+				break;
+		}
+		if (checkCur > 0 || checkPar > 0 || checkSeg > 0)
+		{
+			newDist[max(wholeMinusNeighbors[q], someNodeIndex)][min(wholeMinusNeighbors[q], someNodeIndex)] = numeric_limits<double>::infinity();
+			//vector<int>::iterator deletingNeigh;
+			//deletingNeigh = wholeMinusNeighbors.begin() + q;
+			//wholeMinusNeighbors.erase(deletingNeigh);
+		}
+
+		/*
+		int check = costmapObstacleCheck(Row{graph[wholeMinusNeighbors[q]][0], graph[wholeMinusNeighbors[q]][1]}, Row{graph[someNodeIndex][0], graph[someNodeIndex][1]}, mapsub);
+
+		if (check == 0)
+		{
+			//ROS_WARN("OHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+			//vector<int>::iterator deletingNeigh;
+			//deletingNeigh = wholeMinusNeighbors.begin() + q;
+			//wholeMinusNeighbors.erase(deletingNeigh);
+			newDist[max(wholeMinusNeighbors[q], someNodeIndex)][min(wholeMinusNeighbors[q], someNodeIndex)] = numeric_limits<double>::infinity();
+		}
+		
+	}
+*/	
+
+
 	for (int j = 0; j < wholeMinusNeighbors.size(); j++)
 	{
 
@@ -34,7 +77,13 @@ void rewireNeighbors(int someNodeIndex, Matrix &graph, Matrix &Q, N &neighbors, 
 		{
 			//int check = costmapObstacleCheck(Row{graph[u][0], graph[u][1]}, Row{graph[someNodeIndex][0], graph[someNodeIndex][1]}, mapsub);
 			//if (check == 0)
+			//{
 			//	ROS_WARN("shiiiiiiiiiiiiiiiiiiiiiiiit");
+			//	lmc[u] = numeric_limits<double>::infinity();
+			//	graph[u][3] = numeric_limits<double>::infinity();
+			//	gValue[u] = numeric_limits<double>::infinity();
+			//	continue;
+			//}
 			lmc[u] = newDist[max(u, someNodeIndex)][min(u, someNodeIndex)] + lmc[someNodeIndex];
 
 			graph[u][3] = someNodeIndex;

@@ -13,8 +13,8 @@ nav_msgs::OccupancyGrid costmapData;
 bool goalChanged = false;
 double x_rob, y_rob, yaw_rob;
 tf::Quaternion q;
-double startThres = 0.1;
-
+double startThres = 0.5;
+int tr = 600;
 //////////////////////////////////////////////////////////////////////////
 double x_goal, y_goal;
 double x_start, y_start;
@@ -31,7 +31,7 @@ N neighbors;
 Row temp_newDist;
 Matrix newDist;
 Matrix Q;
-double epsilon = 0.1;
+double epsilon = 1;
 vector<int> orphansIndex;
 vector<double> closeNodesIndexStore;
 bool noTree = false;
@@ -72,8 +72,9 @@ int main(int argc, char **argv)
     ros::Subscriber mapSub = nh.subscribe("/map", 100, mapUpdateCallBack);
     ros::Subscriber rviz_sub = nh.subscribe("/move_base_simple/goal", 0, rvizGoalCallBack);
     ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
-
-    ros::Rate rate(600);
+    ros::Publisher poseStamped = nh.advertise<geometry_msgs::PoseStamped>("positionControl", 10);
+    ros::Publisher robPose = nh.advertise<geometry_msgs::PoseStamped>("pose", 10);
+    ros::Rate rate(1000);
 
     while (mapData.header.seq < 1 or mapData.data.size() < 1)
     {
@@ -135,8 +136,8 @@ int main(int argc, char **argv)
     while (ros::ok())
     {
         ///////////////////BALL//////////////////////////////
-        //double r = shrinkingBallRadius(graph.size(), step_size);
-        double r = 1;
+       // double r = shrinkingBallRadius(graph.size(), step_size);
+        double r = step_size;
         ///////////////////CURRENT POSE//////////////////////
 
         int temp = 0;
@@ -159,7 +160,12 @@ int main(int argc, char **argv)
         q = transform.getRotation();
         yaw_rob = tf::getYaw(q);
         ////////////////PUB POSE//////////////////////////////
-
+        geometry_msgs::PoseStamped pose;
+        pose.pose.position.x = x_rob;
+        pose.pose.position.y = y_rob;
+        pose.pose.position.z = 0;
+        pose.pose.orientation = tf::createQuaternionMsgFromYaw(yaw_rob);
+        robPose.publish(pose);
         /////////////////GOAL CHANGED: RESET PLANNING//////////////////////////////
         if (goalChanged == true)
         {
@@ -205,32 +211,78 @@ int main(int argc, char **argv)
         bool shouldUpdateObs = false;
         vector<double> closeNodesIndex;
         vector<double> diff;
+        int segs = 2;
+        if (i >= tr && fmod(i,10)==0)
+        {
+            for (int count = 1; count < graph.size(); count++)
+            {
 
-        for (int count = 0; count < graph.size(); count++)
-        {
+                // if (gridValue(costmapData, Row{graph[count][0], graph[count][1]}) > 0)
+                //   closeNodesIndex.push_back(graph[count][2]);
+                /*
+                double parentIndex = graph[count][3];
+                int check = costmapObstacleCheck(Row{graph[count][0], graph[count][1]}, Row{graph[parentIndex][0], graph[parentIndex][1]}, costmapData);
 
-            if (gridValue(costmapData, Row{graph[count][0], graph[count][1]}) > 0)
-                closeNodesIndex.push_back(graph[count][2]);
-        }
-        if (closeNodesIndexStore.empty())
-        {
-            closeNodesIndexStore = closeNodesIndex;
-            shouldUpdateObs = true;
-        }
-        else
-        {
-            std::set_difference(closeNodesIndex.begin(), closeNodesIndex.end(), closeNodesIndexStore.begin(), closeNodesIndexStore.end(),
-                                std::inserter(diff, diff.begin()));
-            closeNodesIndexStore = closeNodesIndex;
-            closeNodesIndex = diff;
-            if (!closeNodesIndex.empty())
+                if (check == 0)
+                {
+                    closeNodesIndex.push_back(graph[count][2]);
+                    closeNodesIndex.push_back(graph[parentIndex][2]);
+                }
+                */
+                double parentIndex = graph[count][3];
+                int checkCur = gridValue(costmapData, Row{graph[count][0], graph[count][1]});
+                int checkPar = gridValue(costmapData, Row{graph[parentIndex][0], graph[parentIndex][1]});
+                int checkSeg;
+                for (int j = 0; j < segs; j++)
+                {
+                    double x, y;
+                    x = (j / segs) * (graph[count][0] + graph[parentIndex][0]);
+                    y = (j / segs) * (graph[count][1] + graph[parentIndex][1]);
+                    checkSeg = gridValue(costmapData, Row{x, y});
+                    if (checkSeg > 0)
+                        break;
+                }
+                if (checkCur > 0 || checkPar > 0 || checkSeg > 0)
+                {
+                    closeNodesIndex.push_back(graph[count][2]);
+                    closeNodesIndex.push_back(graph[parentIndex][2]);
+                    /* //rewire neighbor ham niaz be obstacleCkeck dare vase hamin goftam if else paeen ro pak kunam ta har dafe tamam orphan haro dobare dorost
+                    //kune vali bi fayede bod! shayad bayad rewire ro dorost kunam ta obstacle check ham bokune moghe taghire parent!
+                    vector<double>::iterator ip;
+                    ip = std::unique(closeNodesIndex.begin(), closeNodesIndex.end());
+                    closeNodesIndex.resize(std::distance(closeNodesIndex.begin(), ip));
+                    if (closeNodesIndexStore.empty())
+                        shouldUpdateObs = true;
+                    */
+                }
+            }
+            if (closeNodesIndexStore.empty())
+            {
+                vector<double>::iterator ip;
+                ip = std::unique(closeNodesIndex.begin(), closeNodesIndex.end());
+                closeNodesIndex.resize(std::distance(closeNodesIndex.begin(), ip));
+
+                closeNodesIndexStore = closeNodesIndex;
                 shouldUpdateObs = true;
+            }
+            else
+            {
+                vector<double>::iterator ip;
+                ip = std::unique(closeNodesIndex.begin(), closeNodesIndex.end());
+                closeNodesIndex.resize(std::distance(closeNodesIndex.begin(), ip));
+
+                std::set_difference(closeNodesIndex.begin(), closeNodesIndex.end(), closeNodesIndexStore.begin(), closeNodesIndexStore.end(),
+                                    std::inserter(diff, diff.begin()));
+                closeNodesIndexStore = closeNodesIndex;
+                closeNodesIndex = diff;
+                if (!closeNodesIndex.empty())
+                    shouldUpdateObs = true;
+            }
+
+            if (shouldUpdateObs == true)
+                updateObstacles(costmapData, graph, Q, neighbors, newDist, gValue, lmc, orphansIndex, r, epsilon, robotNode, closeNodesIndex);
         }
-
-        if (shouldUpdateObs == true)
-            updateObstacles(costmapData, graph, Q, neighbors, newDist, gValue, lmc, orphansIndex, r, epsilon, robotNode, closeNodesIndex);
-
-        if (i < 500)
+        if (i < tr)
         {
             ////////////////////SAMPLING/////////////////////////
 
@@ -239,13 +291,13 @@ int main(int argc, char **argv)
             //double sample_y = randomGenerator(-2, 6);
 
             ////maze param /////
-            double sample_x = randomGenerator(-1, 10);
-            double sample_y = randomGenerator(-2, 9);
+            double sample_x = randomGenerator(0, 9);
+            double sample_y = randomGenerator(-1, 9);
             //double sample_x = randomGenerator(-2, 30);
             //double sample_y = randomGenerator(-2, 30);
             double random = randomGenerator(0, 1);
 
-            if (random < 0.12 && reachedStart == false)
+            if (random < 0.05 && reachedStart == false)
                 node = {x_start, y_start, (double)i, 0};
             else
                 node = {sample_x, sample_y, (double)i, 0};
@@ -342,7 +394,7 @@ int main(int argc, char **argv)
                             noTree = true;
                             break;
                         }
-                        tree.push_back(Row{graph[cond][0], graph[cond][1]});
+                        tree.push_back(Row{graph[cond][0], graph[cond][1], graph[cond][2], graph[cond][3]});
 
                         p.x = tree[counter][0];
                         p.y = tree[counter][1];
@@ -372,10 +424,51 @@ int main(int argc, char **argv)
             }
         }
 
-        if (i >= 500)
+        if (i >= tr)
         {
             if (reachedStart == true)
             {
+                /////////////////////////WHAT IS THE CURRENT ROBOT NODE//////////////////////////
+                if (noTree == false)
+                {
+                    dist.clear();
+                    for (int j = 0; j < tree.size(); j++)
+                    {
+                        //if (graph[j][3] != numeric_limits<double>::infinity())
+                        //{
+                        Row check_node = {tree[j][0], tree[j][1]};
+                        Row current_node = {x_rob, y_rob};
+                        val = euc_dist(check_node, current_node);
+                        dist.push_back(val);
+                        //}
+                    }
+                    min_dist = LargestOrSmallestElement(dist, dist.size(), "smallest");
+
+                    double min_dist_value = get<0>(min_dist);
+                    int min_dist_index = get<1>(min_dist);
+                    robotNode = tree[min_dist_index][2];
+                }
+                else
+                {
+                    dist.clear();
+                    for (int j = 0; j < graph.size(); j++)
+                    {
+                        //if (graph[j][3] != numeric_limits<double>::infinity())
+                        //{
+                        Row check_node = {graph[j][0], graph[j][1]};
+                        Row current_node = {x_rob, y_rob};
+                        val = euc_dist(check_node, current_node);
+                        dist.push_back(val);
+                        //}
+                    }
+                    min_dist = LargestOrSmallestElement(dist, dist.size(), "smallest");
+
+                    double min_dist_value = get<0>(min_dist);
+                    int min_dist_index = get<1>(min_dist);
+                    robotNode = graph[min_dist_index][2];
+                }
+
+                //////////////////////////////////////////////////////////////////////////////////
                 //clear RVIZ
                 points.action = points.DELETEALL;
                 line_strip.action = line_strip.DELETEALL;
@@ -394,7 +487,7 @@ int main(int argc, char **argv)
                 int counter = 0;
                 tree.clear();
 
-                /////////////////wWHOLE GRAPH VISUALIZATION//////////////////////////OPTIONAL///////
+                /////////////////WHOLE GRAPH VISUALIZATION//////////////////////////OPTIONAL///////
                 for (int k = 0; k < graph.size(); k++)
                 {
                     if (graph[k][3] != numeric_limits<double>::infinity())
@@ -420,11 +513,11 @@ int main(int argc, char **argv)
                 {
                     if (graph[cond][3] == numeric_limits<double>::infinity())
                     {
-                        ROS_WARN("NO TREEEEEEEEE");
+                        ROS_WARN("NO TREE");
                         noTree = true;
                         break;
                     }
-                    tree.push_back(Row{graph[cond][0], graph[cond][1]});
+                    tree.push_back(Row{graph[cond][0], graph[cond][1], graph[cond][2], graph[cond][3]});
                     //RVIZ
                     p.x = tree[counter][0];
                     p.y = tree[counter][1];
@@ -450,10 +543,48 @@ int main(int argc, char **argv)
                 }
                 marker_pub.publish(line_strip); //addition
                 marker_pub.publish(points);
+
+                /////////////////////////////////PUBLISHING POSE////////////////////////////////////////
+                if (noTree == false)
+                {
+                    Row andix;
+                    andix = find(tree, robotNode);
+                    int par = tree[andix[0]][3];
+                    if (euc_dist(Row{x_rob,y_rob},Row{x_goal,y_goal})<0.7)
+                    {
+                        geometry_msgs::PoseStamped point;
+                        point.pose.position.x = x_rob;
+                        point.pose.position.y = y_rob;
+                        point.pose.position.z = 0;
+                        point.pose.orientation = tf::createQuaternionMsgFromYaw(yaw_rob);
+                        poseStamped.publish(point); //publishing the currrent position
+                    }
+                    else
+                    {
+                        ////////////////////////////////////////////////////////
+                        geometry_msgs::PoseStamped point;
+                        point.pose.position.x = graph[par][0];
+                        point.pose.position.y = graph[par][1];
+                        point.pose.position.z = 0;
+                        point.pose.orientation = tf::createQuaternionMsgFromYaw(yaw_rob);
+                        poseStamped.publish(point); //publish miniGoal
+                    }
+                }
+                else
+                {
+                    geometry_msgs::PoseStamped point;
+                    point.pose.position.x = x_rob;
+                    point.pose.position.y = y_rob;
+                    point.pose.position.z = 0;
+                    point.pose.orientation = tf::createQuaternionMsgFromYaw(yaw_rob);
+                    poseStamped.publish(point); //publishing the currrent position
+                }
+
+                ////////////////////////////////////////////////////////////////////////////////////////////////////
             }
         }
 
-        ROS_INFO_STREAM(r);
+        ROS_INFO_STREAM(i);
         ros::spinOnce();
         rate.sleep();
     }

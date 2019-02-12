@@ -149,7 +149,7 @@ void sortrows(Matrix &matrix, int col)
 //Adopted funcs
 int costmapObstacleCheck(Row xnear, Row xnew, nav_msgs::OccupancyGrid mapsub)
 {
-	double rez = double(mapsub.info.resolution) * 1;
+	double rez = double(mapsub.info.resolution) * 2;
 	double stepz = int(ceil(euc_dist(xnew, xnear)) / rez);
 	Row xnew_ = xnew;
 	Row xnear_ = xnear;

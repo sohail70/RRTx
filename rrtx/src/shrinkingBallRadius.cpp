@@ -10,7 +10,7 @@ double shrinkingBallRadius(int number_of_nodes, double step_size)
 	double mu = pow(30, dimension);
 
 	double zeta_d = (pow(Pi, dimension / 2)) / (tgamma((dimension / 2) + 1));
-	double factor = 1;
+	double factor = 30;
 	double gamma_rrt_star = factor * (pow(2 * (1 + 1 / dimension), 1 / dimension)) * pow(mu / zeta_d, 1 / dimension);
 	double value = pow(gamma_rrt_star * log10(number_of_nodes) / number_of_nodes, 1 / dimension);
 

@@ -4,7 +4,7 @@
 void updateLmc(int someNodeIndex, Matrix& graph ,Matrix newDist,N neighbors ,Row& lmc , double r , vector<int> orphansIndex)
 {
 	
-	cullNeighbors(graph, someNodeIndex, neighbors, r, newDist);
+	//cullNeighbors(graph, someNodeIndex, neighbors, r, newDist);
 
 	vector<int> wholePlusNeighbors;
 	wholePlusNeighbors = neighbors.original_plus.at(someNodeIndex);

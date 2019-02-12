@@ -55,8 +55,6 @@ void propagateDescendants(Matrix &graph, Matrix &Q, N &neighbors, vector<int> &o
 		{
 			wholePlusNeighborsAndParent.push_back(neighbors.running_plus.at(orphansIndex[i]).at(k));
 		}
-
-		ROS_WARN("graph %f %f %f %f", graph[orphansIndex[i]][0], graph[orphansIndex[i]][1], graph[orphansIndex[i]][2], graph[orphansIndex[i]][3]);
 		if (graph[orphansIndex[i]][3] != numeric_limits<double>::infinity())
 			wholePlusNeighborsAndParent.push_back(graph[orphansIndex[i]][3]);
 
